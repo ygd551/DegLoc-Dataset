@@ -10,7 +10,7 @@ Most LiDAR SLAM datasets are recorded in structurally rich environments. This da
 
 - **Sensor**: Livox Avia (non-repetitive scan LiDAR) with built-in IMU
 - **Format**: ROS 1 bag files (`.bag`)
-- **Ground truth**: **not included** — the bags contain raw LiDAR + IMU data only, no motion-capture/RTK/total-station reference trajectory
+- **Ground truth**: **not included** — the bags contain raw LiDAR + IMU data only, no motion-capture/RTK/total-station reference trajectory. Except for `corridor1`/`corridor2`, every sequence starts and ends at the same physical location, so localization accuracy is best evaluated with **loop-closure error** (start-to-end pose drift) rather than a full-trajectory metric.
 - **Total size**: ~13 GB across 24 sequences
 
 ---
@@ -38,6 +38,8 @@ Playing or parsing the bags requires the [`livox_ros_driver`](https://github.com
 | Stairs | `stairs1.bag`, `stairs2.bag`, `stairs3.bag` | Staircase ascent/descent, three LiDAR-pitch strategies: **1** level throughout, **2** tilted down descending / tilted up ascending, **3** tilted up descending / tilted up ascending |
 
 File numbering is per scene as recorded and not necessarily continuous (e.g. playground starts at 3).
+
+`corridor1` and `corridor2` are one-way traversals (no return to the start). Every other sequence is a closed loop — start and end pose coincide.
 
 ---
 
