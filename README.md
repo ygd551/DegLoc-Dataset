@@ -11,7 +11,7 @@ Most LiDAR SLAM datasets are recorded in structurally rich environments. This da
 - **Sensor**: Livox Avia (non-repetitive scan LiDAR) with built-in IMU
 - **Format**: ROS 1 bag files (`.bag`)
 - **Ground truth**: **not included** — the bags contain raw LiDAR + IMU data only, no motion-capture/RTK/total-station reference trajectory
-- **Total size**: ~13 GB across 24 sequences + calibration data
+- **Total size**: ~13 GB across 24 sequences
 
 ---
 
@@ -23,8 +23,6 @@ Most LiDAR SLAM datasets are recorded in structurally rich environments. This da
 | `/livox/imu` | `sensor_msgs/Imu` | ~200 Hz | built-in IMU |
 
 Playing or parsing the bags requires the [`livox_ros_driver`](https://github.com/Livox-SDK/livox_ros_driver) message definitions on the ROS side. Convert to `sensor_msgs/PointCloud2` if your pipeline needs the standard message type.
-
-Extrinsic calibration (LiDAR → IMU) is in `calibration/`, see [Section 4](#4-calibration).
 
 ---
 
@@ -43,25 +41,7 @@ File numbering is per scene as recorded and not necessarily continuous (e.g. pla
 
 ---
 
-## 4. Calibration
-
-`calibration/` contains:
-
-- `avia_lidar_imu_calibartion.bag` — dedicated LiDAR–IMU calibration recording
-- `avia_imu_calibration_imu_param.yaml` — IMU intrinsic parameters
-- `lidar_to_imu_calibration/Initialization_result*.txt` — extrinsic initialization output, e.g.:
-
-```
-Rotation LiDAR to IMU (degree)     = -0.686968  0.308924  0.915792
-Translation LiDAR to IMU (meter)   = -0.108021  0.065665  0.125720
-Time Lag IMU to LiDAR (second)     = -0.137885
-```
-
-> Note (from the author's own calibration notes): the extrinsic result is **not fully reliable** — treat it as a rough initial guess and re-calibrate for precision-sensitive use.
-
----
-
-## 5. Known behavior (preliminary notes)
+## 4. Known behavior (preliminary notes)
 
 Early qualitative testing with LIO-SAM-Livox (informal sequence names, not necessarily matching the released file names) found:
 
@@ -74,9 +54,9 @@ These are informal observations from initial testing, not a benchmark result —
 
 ---
 
-## 6. Download
+## 5. Download
 
-Full dataset (bags + calibration + reference photos), hosted on OneDrive:
+Full dataset (bags + reference photos), hosted on OneDrive:
 
 **[Download link](https://1drv.ms/f/c/79a81de325c140b7/IgA-4FqeGawxQKA-Z424fOaMAeaS9Tpn-0dSFbS094IArCg?e=bF0fVX)**
 
@@ -84,7 +64,7 @@ Total size ≈ 13 GB. The raw data is not stored in this Git repository.
 
 ---
 
-## 7. Quick start
+## 6. Quick start
 
 ```bash
 rosbag info corridor1.bag
