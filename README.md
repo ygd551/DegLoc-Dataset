@@ -62,6 +62,12 @@ rosbag play corridor1.bag --clock
 
 ---
 
+## 6. TODO
+
+- [ ] Benchmark this dataset against common LIO algorithms (e.g. FAST-LIO2, Point-LIO, LIO-SAM) and report loop-closure error per sequence.
+
+---
+
 ## Contact
 
 Questions or issues: please open a [GitHub issue](../../issues) on this repository.
