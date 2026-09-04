@@ -41,20 +41,7 @@ File numbering is per scene as recorded and not necessarily continuous (e.g. pla
 
 ---
 
-## 4. Known behavior (preliminary notes)
-
-Early qualitative testing with LIO-SAM-Livox (informal sequence names, not necessarily matching the released file names) found:
-
-- Drift starts almost immediately in the indoor lab-like scene.
-- In corridors, drift appears mainly when turning around — for a moment the LiDAR faces only a flat wall, geometric constraints collapse, and the estimate jumps.
-- Walking vs. jogging speed had little effect on drift.
-- Side-facing scans did not help pure-geometry-based localization (and can weaken geometric constraints further); they may be more useful for intensity-feature-based methods.
-
-These are informal observations from initial testing, not a benchmark result — reported here as context for why the dataset is structured the way it is.
-
----
-
-## 5. Download
+## 4. Download
 
 Full dataset (bags + reference photos), hosted on OneDrive:
 
@@ -64,7 +51,7 @@ Total size ≈ 13 GB. The raw data is not stored in this Git repository.
 
 ---
 
-## 6. Quick start
+## 5. Quick start
 
 ```bash
 rosbag info corridor1.bag
