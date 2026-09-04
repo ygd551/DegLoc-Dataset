@@ -1,195 +1,98 @@
-# GeoDegen-Dataset
+# DegLoc-Dataset
 
-A Livox Avia LiDAR-inertial dataset targeting **geometrically degenerate environments** — tunnels, long corridors, open flat areas, and other scenes where point-to-plane / point-to-edge constraints become ill-conditioned.
-
-<!-- Badges: uncomment and fill in once available
-[![Paper](https://img.shields.io/badge/paper-arXiv-b31b1b.svg)](TODO)
-[![License](https://img.shields.io/badge/license-CC%20BY--NC--SA%204.0-blue.svg)](LICENSE)
--->
+A Livox Avia LiDAR-inertial dataset collected in **geometrically degenerate indoor/outdoor scenes** — long corridors, open halls, staircases, and large flat squares/playgrounds — where point-to-plane / point-to-edge constraints become weak or ill-conditioned and LiDAR(-inertial) odometry is prone to drift.
 
 ---
 
-## 1. Motivation
+## 1. Overview
 
-Most public LiDAR SLAM benchmarks are collected in structurally rich environments, where geometric constraints are well-conditioned in all six degrees of freedom. In practice, robots frequently operate in scenes that provide **insufficient geometric constraints** along one or more directions:
+Most LiDAR SLAM datasets are recorded in structurally rich environments. This dataset instead targets scenes where geometric constraints are **insufficient along one or more directions**, e.g. long straight corridors (translation along the corridor axis is weakly constrained), open squares/playgrounds (few vertical structures), and staircases (repetitive, near-symmetric geometry). It is intended for evaluating and improving the robustness of LiDAR-inertial odometry (LIO) under geometric degeneracy.
 
-- long tunnels and underground corridors (translation along the axis is unconstrained)
-- open flat ground / parking lots (few vertical structures)
-- narrow staircases and featureless walls
-- large-scale symmetric or repetitive structures
-
-In such scenes the Hessian of the scan-registration problem becomes **rank-deficient**, and state estimation drifts or diverges even for otherwise robust odometry pipelines.
-
-This dataset provides sequences specifically recorded in these conditions, together with ground-truth trajectories, to support:
-
-- benchmarking the robustness of LiDAR / LiDAR-inertial odometry
-- development and evaluation of degeneracy detection and mitigation methods
-- studying sensor-fusion strategies under partial observability
+- **Sensor**: Livox Avia (non-repetitive scan LiDAR) with built-in IMU
+- **Format**: ROS 1 bag files (`.bag`)
+- **Ground truth**: **not included** — the bags contain raw LiDAR + IMU data only, no motion-capture/RTK/total-station reference trajectory
+- **Total size**: ~13 GB across 24 sequences + calibration data
 
 ---
 
-## 2. Sensor Setup
+## 2. Sensor setup
 
-| Item | Specification |
-|---|---|
-| LiDAR | Livox Avia (non-repetitive scanning, FOV 70.4° × 77.2°) |
-| IMU | Built-in BMI088, 200 Hz |
-| Point rate | 240,000 pts/s (first return) |
-| Ground truth | TODO — e.g. Leica MS60 / MoCap / RTK-GNSS |
-| Platform | TODO — handheld / UGV / UAV |
-| Extrinsics | See `calib/` |
+| Topic | Type | Approx. rate | Content |
+|---|---|---|---|
+| `/livox/lidar` | `livox_ros_driver/CustomMsg` | ~10 Hz | per-point timestamped point cloud (Livox custom message, not `PointCloud2`) |
+| `/livox/imu` | `sensor_msgs/Imu` | ~200 Hz | built-in IMU |
 
-> Replace the TODO rows with your actual configuration. If ground truth is only available for part of the sequences, state that explicitly here — it is the first thing reviewers look for.
+Playing or parsing the bags requires the [`livox_ros_driver`](https://github.com/Livox-SDK/livox_ros_driver) message definitions on the ROS side. Convert to `sensor_msgs/PointCloud2` if your pipeline needs the standard message type.
 
-<!-- Add a photo of the sensor rig here; it substantially improves reproducibility.
-<p align="center"><img src="docs/platform.jpg" width="500"></p>
--->
-
-### Coordinate frames and extrinsics
-
-The LiDAR-to-IMU extrinsic parameters are provided in `calib/extrinsic.yaml`:
-
-```yaml
-extrinsic_T: [ 0.04165, 0.02326, -0.0284 ]
-extrinsic_R: [ 1.0, 0.0, 0.0,
-               0.0, 1.0, 0.0,
-               0.0, 0.0, 1.0 ]
-```
-
-All ground-truth trajectories are expressed in the **IMU (body) frame** unless otherwise noted.
+Extrinsic calibration (LiDAR → IMU) is in `calibration/`, see [Section 4](#4-calibration).
 
 ---
 
 ## 3. Sequences
 
-| Sequence | Scene type | Degeneracy direction | Duration | Length | Ground truth |
-|---|---|---|---|---|---|
-| `tunnel_01` | Straight tunnel | Longitudinal (x) | 3 min 20 s | 180 m | ✅ full |
-| `corridor_01` | Indoor long corridor | Longitudinal (x) | 2 min 45 s | 120 m | ✅ full |
-| `open_ground_01` | Open flat area | Horizontal (x, y) | 4 min 10 s | 260 m | ⚠️ partial |
-| `stairs_01` | Narrow staircase | Rotational (yaw) | 1 min 50 s | 40 m | ❌ none |
+| Scene | Files | Description |
+|---|---|---|
+| Corridor | `corridor1.bag`, `corridor2.bag`, `corridor_loop1.bag`, `corridor_loop2.bag` | Long, feature-poor indoor corridor; `_loop` sequences walk out and back for drift/loop evaluation |
+| Hall | `hall1.bag` – `hall3.bag` | Large indoor hall/lobby, sparse geometric features |
+| Lab | `lab1.bag` – `lab4.bag` (+ `lab.png` reference photo) | Indoor lab room, smaller-scale structured scene |
+| Playground | `playground3.bag` – `playground7.bag` | Outdoor open playground, large flat area with few vertical structures |
+| Square | `square1.bag` – `square6.bag` (+ `square_pic1-3.png` reference photos) | Outdoor open square/plaza |
+| Stairs | `stairs1.bag`, `stairs2.bag`, `stairs3.bag` | Staircase ascent/descent, three LiDAR-pitch strategies: **1** level throughout, **2** tilted down descending / tilted up ascending, **3** tilted up descending / tilted up ascending |
 
-> The table above is a template — fill in your real sequences. Listing the **dominant degeneracy direction** per sequence is what makes this dataset more useful than a generic collection, so keep that column.
-
----
-
-## 4. Data Format
-
-Data is released as ROS bags:
-
-```
-GeoDegen-Dataset/
-├── calib/
-│   ├── extrinsic.yaml
-│   └── imu_intrinsic.yaml
-├── sequences/
-│   ├── tunnel_01/
-│   │   ├── tunnel_01.bag
-│   │   └── tunnel_01_gt.txt
-│   └── ...
-└── tools/
-    ├── evaluate.py
-    └── bag_to_pcd.py
-```
-
-### Topics
-
-| Topic | Type | Rate | Note |
-|---|---|---|---|
-| `/livox/lidar` | `livox_ros_driver/CustomMsg` | 10 Hz | per-point timestamp preserved |
-| `/livox/imu` | `sensor_msgs/Imu` | 200 Hz | |
-
-Point clouds are published in the **custom Livox message format** to retain per-point timestamps, which are required by most LiDAR-inertial pipelines for motion compensation. A conversion script to `sensor_msgs/PointCloud2` is provided in `tools/`.
-
-### Ground-truth format
-
-TUM format, one pose per line, space-separated:
-
-```
-timestamp tx ty tz qx qy qz qw
-```
+File numbering is per scene as recorded and not necessarily continuous (e.g. playground starts at 3).
 
 ---
 
-## 5. Download
+## 4. Calibration
 
-| Source | Link |
-|---|---|
-| Google Drive | TODO |
-| Baidu Netdisk | TODO (code: `xxxx`) |
-| OneDrive | TODO |
+`calibration/` contains:
 
-Total size: **TODO GB**. Sequences can be downloaded individually.
+- `avia_lidar_imu_calibartion.bag` — dedicated LiDAR–IMU calibration recording
+- `avia_imu_calibration_imu_param.yaml` — IMU intrinsic parameters
+- `lidar_to_imu_calibration/Initialization_result*.txt` — extrinsic initialization output, e.g.:
 
-> For datasets above a few GB, avoid hosting the raw data in the Git repository itself. Keep the repo for documentation and tools, and host the bags on a drive service or Zenodo. Zenodo additionally gives you a permanent DOI, which is worth having if a paper is attached.
+```
+Rotation LiDAR to IMU (degree)     = -0.686968  0.308924  0.915792
+Translation LiDAR to IMU (meter)   = -0.108021  0.065665  0.125720
+Time Lag IMU to LiDAR (second)     = -0.137885
+```
+
+> Note (from the author's own calibration notes): the extrinsic result is **not fully reliable** — treat it as a rough initial guess and re-calibrate for precision-sensitive use.
 
 ---
 
-## 6. Quick Start
+## 5. Known behavior (preliminary notes)
+
+Early qualitative testing with LIO-SAM-Livox (informal sequence names, not necessarily matching the released file names) found:
+
+- Drift starts almost immediately in the indoor lab-like scene.
+- In corridors, drift appears mainly when turning around — for a moment the LiDAR faces only a flat wall, geometric constraints collapse, and the estimate jumps.
+- Walking vs. jogging speed had little effect on drift.
+- Side-facing scans did not help pure-geometry-based localization (and can weaken geometric constraints further); they may be more useful for intensity-feature-based methods.
+
+These are informal observations from initial testing, not a benchmark result — reported here as context for why the dataset is structured the way it is.
+
+---
+
+## 6. Download
+
+Full dataset (bags + calibration + reference photos), hosted on OneDrive:
+
+**[Download link](https://1drv.ms/f/c/79a81de325c140b7/IgA-4FqeGawxQKA-Z424fOaMAeaS9Tpn-0dSFbS094IArCg?e=bF0fVX)**
+
+Total size ≈ 13 GB. The raw data is not stored in this Git repository.
+
+---
+
+## 7. Quick start
 
 ```bash
-# 1. Clone
-git clone https://github.com/<user>/GeoDegen-Dataset.git
-cd GeoDegen-Dataset
-
-# 2. Play a sequence
-rosbag play sequences/tunnel_01/tunnel_01.bag --clock
-
-# 3. Evaluate a trajectory against ground truth (requires evo)
-pip install evo --upgrade
-evo_ape tum sequences/tunnel_01/tunnel_01_gt.txt result.txt -va --plot
-```
-
-### Tested with
-
-The sequences have been verified to run with the following open-source pipelines:
-
-- FAST-LIO2
-- Point-LIO
-- LIO-SAM (requires conversion to `PointCloud2`)
-
----
-
-## 7. Evaluation Protocol
-
-To keep results comparable across methods, we recommend reporting:
-
-- **ATE (RMSE)** over the full trajectory
-- **RPE** at 10 m / 50 m sub-trajectory lengths
-- **Final drift** as a percentage of trajectory length, which is the most informative metric in tunnel-like scenes where error accumulates along a single axis
-
-Ground-truth alignment should use `Sim(3)`-free rigid alignment (`evo -a`, not `-s`), since the dataset provides metric-scale references.
-
----
-
-## 8. License
-
-This dataset is released under **CC BY-NC-SA 4.0**. It may be used for academic research; commercial use requires prior permission.
-
-<!-- Choose a license that matches your intent. If you also ship code in tools/,
-     it is common to dual-license: CC BY-NC-SA for data, MIT/Apache-2.0 for code. -->
-
----
-
-## 9. Citation
-
-If you use this dataset in your research, please cite:
-
-```bibtex
-@article{TODO2026geodegen,
-  title   = {TODO: Paper Title},
-  author  = {TODO},
-  journal = {TODO},
-  year    = {2026}
-}
+rosbag info corridor1.bag
+rosbag play corridor1.bag --clock
 ```
 
 ---
 
-## 10. Acknowledgements
+## Contact
 
-TODO — funding, lab, and any site access permissions.
-
-## 11. Contact
-
-Questions and issues are welcome via [GitHub Issues](../../issues), or contact TODO@example.com.
+Questions or issues: please open a [GitHub issue](../../issues) on this repository.
