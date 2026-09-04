@@ -68,6 +68,22 @@ rosbag play corridor1.bag --clock
 
 ---
 
+## 7. Related datasets
+
+Other public datasets targeting geometrically degenerate environments for LiDAR(-inertial) SLAM:
+
+| Dataset | Link |
+|---|---|
+| GEODE dataset | https://github.com/PengYu-Team/GEODE_dataset |
+| ENWIDE dataset | https://projects.asl.ethz.ch/datasets/enwide/ |
+| lidar_degeneracy_datasets | https://github.com/ntnu-arl/lidar_degeneracy_datasets |
+| unified_autonomy_stack_datasets | https://huggingface.co/datasets/ntnu-arl/unified_autonomy_stack_datasets |
+| CERBERUS DARPA Subterranean Challenge – Final Event | https://www.research-collection.ethz.ch/entities/researchdata/5e6105d7-95b1-4e68-8238-9cf3040e0fb9 |
+| ICCV'23 Challenge on LiDAR-Inertial Odometry | https://superodometry.com/iccv23_challenge_LiI |
+| Newer College Dataset | https://drive.google.com/drive/u/0/folders/1uR476FzjN3PfAiCknVKtuZi3_QfVvSdA |
+
+---
+
 ## Contact
 
 Questions or issues: please open a [GitHub issue](../../issues) on this repository.
