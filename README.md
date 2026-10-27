@@ -45,9 +45,24 @@ File numbering is per scene as recorded and not necessarily continuous (e.g. pla
 
 ## 4. Download
 
-Full dataset (bags + reference photos), hosted on OneDrive:
+Full dataset (bags + reference photos), available from either mirror:
 
-**[Download link](https://1drv.ms/f/c/79a81de325c140b7/IgA-4FqeGawxQKA-Z424fOaMAeaS9Tpn-0dSFbS094IArCg?e=bF0fVX)**
+- **Hugging Face**: [xiaoyaohexiaotao/DegLoc-Dataset](https://huggingface.co/datasets/xiaoyaohexiaotao/DegLoc-Dataset)
+- **OneDrive**: [Download link](https://1drv.ms/f/c/79a81de325c140b7/IgA-4FqeGawxQKA-Z424fOaMAeaS9Tpn-0dSFbS094IArCg?e=bF0fVX)
+
+Download from Hugging Face via the CLI:
+
+```bash
+pip install -U huggingface_hub
+
+# whole dataset
+hf download xiaoyaohexiaotao/DegLoc-Dataset --repo-type dataset --local-dir DegLoc-Dataset
+
+# a single sequence
+hf download xiaoyaohexiaotao/DegLoc-Dataset corridor1.bag --repo-type dataset --local-dir DegLoc-Dataset
+```
+
+In mainland China, prefix the command with `HF_ENDPOINT=https://hf-mirror.com` to use the mirror.
 
 Total size ≈ 13 GB. The raw data is not stored in this Git repository.
 
